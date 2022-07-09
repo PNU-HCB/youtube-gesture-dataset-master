@@ -38,10 +38,16 @@ def run_gentle(video_path, vid, result_path):
     transcript = re.sub('\n', ' ', transcript)  # remove newline characters
 
     # align
+    # WAV 파일 리턴
+    # 해당 함수 참고 하면서 생성 가능
     with gentle.resampled(video_path) as wav_file:
         aligner = gentle.ForcedAligner(resources, transcript, nthreads=nthreads, disfluency=False, conservative=False,
                                        disfluencies=disfluencies)
         result = aligner.transcribe(wav_file, logging=logging)
+
+    # resources는 gentle의 클래스인데 lang, gpu_path 등의 정보
+    # result를 얻어야 함
+    # TimeStamp 찍는 느낌인데 결과를 한 번 봐야할듯
 
     # write results
     with open(result_path, 'w', encoding="utf-8") as fh:
@@ -49,8 +55,11 @@ def run_gentle(video_path, vid, result_path):
 
 
 def main():
+    # 사용자가 제시한 조건에 맞는 파일명을 리스트 형식으로 반환
     videos = glob.glob(my_config.VIDEO_PATH + "/*.mp4")
     n_total = len(videos)
+    # os.path.getmtime : 마지막 수정시간
+    # tqdm : 반복자에 대한 진행률을 볼 수 있다.
     for i, file_path in tqdm(enumerate(sorted(videos, key=os.path.getmtime))):
         vid = os.path.split(file_path)[1][-15:-4]
         print('{}/{} - {}'.format(i+1, n_total, vid))
